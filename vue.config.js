@@ -1,7 +1,7 @@
 module.exports = {
   configureWebpack: {
-    externals: {
-      gapi: 'gapi'
-    }
+    // externals: {
+    //   gapi: 'gapi'
+    // }
   }
 }

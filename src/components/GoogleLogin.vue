@@ -6,55 +6,86 @@
 </template>
 
 <script>
-import { parseToken } from '../utils/jwt';
+import { parseToken } from "../utils/jwt";
+
 export default {
-  name: 'login',
+  name: "login",
   props: {
     onLogin: { type: Function, required: true },
     nonce: { type: String },
-    forceSignin: { type: Boolean }
+    forceSignin: { type: Boolean },
   },
-  data () {
+  data() {
     return {
-      error: null
-    }
+      error: null,
+      tokenClient: null, // Token client for OAuth
+    };
   },
-  mounted () {
-    
-  },
-  created () {
-    gapi.load('auth2', () => {
-      gapi.auth2.init({
-        client_id: process.env.VUE_APP_GOOGLE_CLIENT_ID,
-        ux_mode: 'popup',
-        nonce: this.nonce ? Buffer.from(this.nonce.slice(2), 'hex').toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '') : null,
-        scope: 'openid email'
-      }).then(() => (
-        this.forceSignin ? this.signOut() : Promise.resolve(true)
-      )).then(() => {
-        gapi.signin2.render('google-signin', {
-          onsuccess: this.handleLogin,
-          onfailure: this.handleFailure,
-          longtitle: true,
-          scope: 'openid email' // TODO: How to prevent google from returning all profile info?
-        });
-      });
-    });
+  mounted() {
+    this.loadGoogleIdentityServices();
   },
   methods: {
-    signOut: function() {
-      return gapi.auth2.getAuthInstance().signOut().then(() => console.log("Signed out"));
+    // Dynamically load GIS script
+    loadGoogleIdentityServices() {
+      const script = document.createElement("script");
+      script.src = "https://accounts.google.com/gsi/client";
+      script.async = true;
+      script.defer = true;
+      script.onload = this.initializeGoogleServices;
+      document.head.appendChild(script);
     },
-    handleFailure: function(err) {
-      this.error = err;
+    // Initialize GIS library
+    initializeGoogleServices() {
+      if (!window.google) {
+        this.error = "Google Identity Services not loaded.";
+        return;
+      }
+      console.log("nonce initialize", this.nonce);
+      // Initialize Token Client for OAuth2
+      this.tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: process.env.VUE_APP_GOOGLE_CLIENT_ID,
+        nonce: this.nonce ? Buffer.from(this.nonce.slice(2), "hex").toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "") : null,
+        scope: "openid email",
+        callback: this.handleLogin, 
+      });
+
+      // Render Google Sign-In button
+      google.accounts.id.initialize({
+        client_id: process.env.VUE_APP_GOOGLE_CLIENT_ID,
+        callback: this.handleLoginWithIdToken, // Handle ID token from sign-in
+      });
+      google.accounts.id.renderButton(
+        document.getElementById("google-signin"),
+        {
+          theme: "outline",
+          size: "large",
+          text: "continue_with",
+        }
+      );
+
+      // Optionally prompt the user if forceSignin is enabled
+      if (this.forceSignin) {
+        google.accounts.id.prompt();
+      }
     },
-    handleLogin: function(googleUser) {
-      const token = googleUser.getAuthResponse().id_token;
-      console.log("Signed in", token, parseToken(token))
-      this.onLogin(token);
-    }
-  }
-}
+    handleLoginWithIdToken(response) {
+      // Handle ID token from Google Sign-In
+      const idToken = response.credential;
+      console.log("Signed in with ID token:", idToken, parseToken(idToken));
+      console.log("nonce", this.nonce);
+      this.onLogin(idToken);
+    },
+    handleLogin(tokenResponse) {
+      // Handle OAuth2 access token response
+      console.log("Access token response:", tokenResponse);
+    },
+    signOut() {
+      // Google Identity Services does not provide a direct sign-out method
+      google.accounts.id.disableAutoSelect();
+      console.log("Signed out");
+    },
+  },
+};
 </script>
 
 <style>

@@ -65,6 +65,8 @@ export default {
       this.validAddresses = (this.identityAddress.length === 42 && this.address);
       if (this.validAddresses) {
         console.log("Checking ownership of", this.identityAddress);
+        console.log(this.address);
+        console.log(this.nonce);
         this.owned = null;
         this.owners = null;
         const identity = Identity(this.identityAddress);
