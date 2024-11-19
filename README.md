@@ -1,6 +1,6 @@
 # Solidity JWT validator
 
-Original repo: [Solidity JWT validator](https://github.com/OpenZeppelin/solidity-jwt/tree/master). This repo is to fix and make it working since some libraries have deprecated.
+Original repo: [Solidity JWT validator](https://github.com/OpenZeppelin/solidity-jwt/tree/master). This repo is to fix and make it works since some libraries have deprecated.
 
 This project includes a set of contracts and a Vue-based demo that allow you to **deploy an identity contract** and then **recover it using Google Sign-In**. This is a proof-of-concept and is definitely not ready for production :warning:
 
