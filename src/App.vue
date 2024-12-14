@@ -1,5 +1,6 @@
 <template>
   <div id="app">
+    <notifications group="auth" position="top right" />
     <div v-if="!this.web3 || !this.network">
       <p>Loading...</p>
     </div>
@@ -11,9 +12,6 @@
       <SignUp v-if="signup" />
       <Recover v-if="recover" />
     </div>
-    <footer>
-      <p>Proof of concept built by the <a href="https://openzeppelin.com" target="_blank">OpenZeppelin</a> team. Do not use in production. Read <a href="https://forum.openzeppelin.com/t/sign-in-with-google-to-your-identity-contract-for-fun-and-profit/1631" target="_blank">here</a> for more information, or check out <a href="https://github.com/OpenZeppelin/solidity-jwt" target="_blank">the code</a>.</p>
-    </footer>
   </div>
 </template>
 

@@ -1,5 +1,8 @@
 import Vue from 'vue'
 import App from './App.vue'
+import Notifications from 'vue-notification'
+Vue.use(Notifications)
+
 // import Home from './components/Home.vue'
 // import SignUp from './components/SignUp.vue'
 // import Recover from './components/Recover.vue'
